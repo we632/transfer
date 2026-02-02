@@ -16,7 +16,18 @@
   <div class="card">
     <label><b>{{ t["blocked_ranges"] }}</b></label>
     <div class="hint">{{ t["blocked_hint"] }}</div>
-    <textarea id="blockedRanges" rows="3" placeholder="100-120, 205-210"></textarea>
+    <textarea id="blockedRanges" rows="3" placeholder="100-120, 205-210"
+      {% if blocked_ranges %}readonly style="background:#f5f5f5;"{% endif %}
+    >{{ blocked_ranges }}</textarea>
+    {% if not blocked_ranges %}
+      <div style="margin-top:8px;">
+        <button type="button" id="genLinkBtn">生成专属填写链接</button>
+        <input id="genLinkOut" type="text" style="width:70%;" readonly onclick="this.select()">
+      </div>
+    {% endif %}
+    {% if blocked_ranges %}
+      <div class="hint" style="color:#888;">此页面由管理员预设了不可转范围，无法更改。</div>
+    {% endif %}
   </div>
 
   <div class="card">
@@ -48,6 +59,7 @@
   <script>
     window.__LANG__ = "{{ lang }}";
     window.__T__ = {{ t_json|safe }};
+    window.__BLOCKED_RANGES__ = {{ blocked_ranges|tojson }};
   </script>
   <script src="/static/app.js"></script>
 </body>

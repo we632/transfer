@@ -4,6 +4,7 @@ const lang = window.__LANG__;
 const tbody = document.querySelector("#tbl tbody");
 const errBox = document.querySelector("#errBox");
 const blockedRangesEl = document.querySelector("#blockedRanges");
+const blockedRangesParam = window.__BLOCKED_RANGES__ || "";
 
 function showErr(msg){
   errBox.style.display = "block";
@@ -70,6 +71,7 @@ function collectRows() {
   return rows;
 }
 
+
 document.querySelector("#btnAddRow").addEventListener("click", () => {
   clearErr();
   addRow();
@@ -78,11 +80,35 @@ document.querySelector("#btnAddRow").addEventListener("click", () => {
 // 初始一行
 addRow();
 
+// 生成专属填写链接（仅管理员可见）
+const genLinkBtn = document.getElementById("genLinkBtn");
+if (genLinkBtn) {
+  genLinkBtn.addEventListener("click", () => {
+    const val = blockedRangesEl.value.trim();
+    if (!val) {
+      showErr(t["blocked_ranges"] + t["err_invalid_range"]);
+      return;
+    }
+    // 生成当前页面链接
+    const url = new URL(window.location.href);
+    url.searchParams.set("blocked_ranges", val);
+    document.getElementById("genLinkOut").value = url.toString();
+    clearErr();
+  });
+}
+
+// 如有 blocked_ranges 参数，textarea 只读
+if (blockedRangesParam) {
+  blockedRangesEl.value = blockedRangesParam;
+  blockedRangesEl.readOnly = true;
+  blockedRangesEl.style.background = "#f5f5f5";
+}
+
 document.querySelector("#btnDownload").addEventListener("click", async () => {
   clearErr();
   const payload = {
     lang,
-    blocked_ranges: blockedRangesEl.value.trim(), // ✅ 方案B：不可转范围
+    blocked_ranges: blockedRangesParam || blockedRangesEl.value.trim(), // 优先参数
     rows: collectRows()
   };
 
