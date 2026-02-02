@@ -1,0 +1,54 @@
+<!-- templates/form.html -->
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>{{ t["title"] }}</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div class="topbar">
+    <h2>{{ t["title"] }}</h2>
+    <div class="lang-pill">{{ lang.upper() }}</div>
+  </div>
+
+  <!-- ✅ 方案B：输入“不可转范围”，系统自动校验 -->
+  <div class="card">
+    <label><b>{{ t["blocked_ranges"] }}</b></label>
+    <div class="hint">{{ t["blocked_hint"] }}</div>
+    <textarea id="blockedRanges" rows="3" placeholder="100-120, 205-210"></textarea>
+  </div>
+
+  <div class="card">
+    <div class="actions">
+      <button type="button" id="btnAddRow">{{ t["add_row"] }}</button>
+      <button type="button" id="btnDownload">{{ t["export_pdf"] }}</button>
+    </div>
+
+    <table id="tbl">
+      <thead>
+        <tr>
+          <th>{{ t["from_date"] }}</th>
+          <th>{{ t["route"] }}</th>
+          <th>{{ t["from_driver"] }}</th>
+          <th>{{ t["from_range"] }}</th>
+          <th>{{ t["to_date"] }}</th>
+          <th>{{ t["to_driver"] }}</th>
+          <th>{{ t["to_range"] }}</th>
+          <th>{{ t["non_transferable"] }}</th>
+          <th>{{ t["ops"] }}</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div class="hint" id="errBox" style="display:none;"></div>
+  </div>
+
+  <script>
+    window.__LANG__ = "{{ lang }}";
+    window.__T__ = {{ t_json|safe }};
+  </script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

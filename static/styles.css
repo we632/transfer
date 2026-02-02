@@ -1,0 +1,54 @@
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont;
+  background: #f7f8fa;
+  margin: 0;
+  padding: 20px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+.actions {
+  margin-bottom: 10px;
+}
+
+button {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #fafafa;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #f0f0f0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 6px 8px;
+  text-align: center;
+}
+
+input, select, textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.hint {
+  margin-top: 10px;
+  padding: 8px;
+  background: #ffecec;
+  color: #b00020;
+  border-radius: 6px;
+}
