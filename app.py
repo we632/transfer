@@ -133,13 +133,23 @@ def lang_page(request: Request):
     return templates.TemplateResponse("lang.html", {"request": request})
 
 @app.get("/form", response_class=HTMLResponse)
-def form_page(request: Request, lang: Lang = "zh", blocked_ranges: str = ""):
+def form_page(
+    request: Request,
+    lang: Lang = "zh",
+    blocked_ranges: str = ""
+):
     t = I18N.get(lang, I18N["zh"])
-    # blocked_ranges 传递到模板
     return templates.TemplateResponse(
         "form.html",
-        {"request": request, "lang": lang, "t": t, "t_json": t, "blocked_ranges": blocked_ranges}
+        {
+            "request": request,
+            "lang": lang,
+            "t": t,
+            "t_json": t,
+            "blocked_ranges": blocked_ranges,  # ⭐ 这一行不能少
+        }
     )
+
 
 @app.post("/pdf")
 def export_pdf(payload: PdfPayload):
