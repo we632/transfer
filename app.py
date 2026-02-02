@@ -102,16 +102,18 @@ def parse_range(s: str) -> Optional[Tuple[int,int]]:
 def overlaps(r1: Tuple[int,int], r2: Tuple[int,int]) -> bool:
     return not (r1[1] < r2[0] or r2[1] < r1[0])
 
-def parse_blocked_list(text: str) -> List[Tuple[int,int]]:
-    out = []
-    for part in (text or "").split(","):
-        part = part.strip()
-        if not part:
-            continue
-        r = parse_range(part)
-        if r:
-            out.append(r)
-    return out
+def parse_blocked_entry(entry: str) -> Optional[Tuple[str, Tuple[int, int]]]:
+    """解析格式如 'A01:100-120' 的字符串，返回 (线路, (开始, 结束))"""
+    try:
+        if ":" not in entry:
+            return None
+        route_part, range_part = entry.split(":", 1)
+        rng = parse_range(range_part)
+        if rng:
+            return (route_part.strip().upper(), rng)
+    except:
+        return None
+    return None
 
 class Row(BaseModel):
     from_date: str
@@ -155,22 +157,33 @@ def form_page(
 def export_pdf(payload: PdfPayload):
     t = I18N.get(payload.lang, I18N["zh"])
 
-    blocked = parse_blocked_list(payload.blocked_ranges)
+    # 1. 解析规则
+    blocked_map = {}
+    for part in payload.blocked_ranges.split(","):
+        res = parse_blocked_entry(part)
+        if res:
+            route, rng = res
+            if route not in blocked_map:
+                blocked_map[route] = []
+            blocked_map[route].append(rng)
 
-    # ✅ 校验
+    # 2. 执行校验
     for i, row in enumerate(payload.rows, start=1):
         tr = parse_range(row.to_range)
         if not tr:
             return JSONResponse({"ok": False, "msg": t["err_invalid_range"], "row": i}, status_code=400)
 
-        # 方案A：行级锁定：locked=true 就不允许导出（或不允许提交）
+        # 方案A：行级手动锁定
         if row.locked:
             return JSONResponse({"ok": False, "msg": t["err_overlap_blocked"].format(idx=i), "row": i}, status_code=400)
 
-        # 方案B：与“不可转范围”重叠就阻止
-        for br in blocked:
-            if overlaps(tr, br):
-                return JSONResponse({"ok": False, "msg": t["err_overlap_blocked"].format(idx=i), "row": i}, status_code=400)
+        # 方案B：系统自动规则锁定（匹配线路+范围）
+        current_route = row.route.upper()
+        if current_route in blocked_map:
+            for br in blocked_map[current_route]:
+                if overlaps(tr, br):
+                    error_msg = f"第 {i} 行：线路 {current_route} 的范围 {row.to_range} 属于不可转范围。"
+                    return JSONResponse({"ok": False, "msg": error_msg, "row": i}, status_code=400)
 
     # ✅ 生成 PDF
     buf = io.BytesIO()

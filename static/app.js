@@ -80,23 +80,45 @@ document.querySelector("#btnAddRow").addEventListener("click", () => {
 // 初始一行
 addRow();
 
-// 生成专属填写链接（仅管理员可见）
+// 修改生成链接的逻辑 (static/app.js)
+
 const genLinkBtn = document.getElementById("genLinkBtn");
 if (genLinkBtn) {
   genLinkBtn.addEventListener("click", () => {
-    const val = blockedRangesEl.value.trim();
+    const val = blockedRangesEl.value.trim(); // 格式应为 A01:100-120, A02:200-250
     if (!val) {
-      showErr(t["blocked_ranges"] + t["err_invalid_range"]);
+      alert("请输入不可转范围，格式：线路:范围 (如 A01:100-120)");
       return;
     }
-    // 生成当前页面链接
-    const url = new URL(window.location.href);
-    url.searchParams.set("blocked_ranges", val);
+
+    const url = new URL(window.location.origin + window.location.pathname);
+    url.searchParams.set("lang", lang);
+    
+    // 使用 Base64 简单处理，让链接看起来像是一串加密字符
+    const secretToken = btoa(unescape(encodeURIComponent(val)));
+    url.searchParams.set("token", secretToken); 
+
     document.getElementById("genLinkOut").value = url.toString();
     clearErr();
   });
 }
 
+// 页面加载时解析 token
+const urlParams = new URLSearchParams(window.location.search);
+const token = urlParams.get("token");
+if (token) {
+  try {
+    const decoded = decodeURIComponent(escape(atob(token)));
+    window.__BLOCKED_RANGES__ = decoded;
+    blockedRangesEl.value = decoded;
+    blockedRangesEl.readOnly = true;
+    blockedRangesEl.style.background = "#f5f5f5";
+    // 如果有 token，隐藏管理员配置控件，只给填写者看表格
+    if(genLinkBtn) genLinkBtn.parentElement.style.display = 'none';
+  } catch (e) {
+    console.error("Invalid Token");
+  }
+}
 // 如有 blocked_ranges 参数，textarea 只读
 if (blockedRangesParam) {
   blockedRangesEl.value = blockedRangesParam;

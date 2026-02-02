@@ -12,23 +12,38 @@
     <div class="lang-pill">{{ lang.upper() }}</div>
   </div>
 
-  <!-- ✅ 方案B：输入“不可转范围”，系统自动校验 -->
-  <div class="card">
-    <label><b>{{ t["blocked_ranges"] }}</b></label>
-    <div class="hint">{{ t["blocked_hint"] }}</div>
-    <textarea id="blockedRanges" rows="3" placeholder="100-120, 205-210"
+<div class="card">
+  <label><b>{{ t["blocked_ranges"] }}</b></label>
+  
+  <div id="adminArea">
+    <div class="hint">
+      格式：<b>线路:范围</b>，多个用逗号隔开。<br>
+      例如：A01:100-120, A05:200-300
+    </div>
+    <textarea id="blockedRanges" rows="3" placeholder="A01:100-120, A02:200-210"
       {% if blocked_ranges %}readonly style="background:#f5f5f5;"{% endif %}
     >{{ blocked_ranges }}</textarea>
+    
     {% if not blocked_ranges %}
       <div style="margin-top:8px;">
         <button type="button" id="genLinkBtn">生成专属填写链接</button>
         <input id="genLinkOut" type="text" style="width:70%;" readonly onclick="this.select()">
       </div>
     {% endif %}
-    {% if blocked_ranges %}
-      <div class="hint" style="color:#888;">此页面由管理员预设了不可转范围，无法更改。</div>
-    {% endif %}
   </div>
+
+  <div id="userArea" style="display:none;">
+    <div class="hint" style="background:#e3f2fd; color:#0d47a1; border:1px solid #bbdefb; margin-bottom:10px;">
+      ⚠️ 以下线路和包裹范围已被系统锁定，不可进行转单操作：
+    </div>
+    <ul id="blockedListDisplay" style="margin: 10px 0; padding-left:25px; color:#d32f2f; font-weight:bold; line-height:1.6;">
+      </ul>
+  </div>
+
+  {% if blocked_ranges %}
+    <div class="hint" style="color:#888;">此页面由管理员预设了不可转规则，无法更改。</div>
+  {% endif %}
+</div>
 
   <div class="card">
     <div class="actions">
