@@ -111,7 +111,7 @@ def parse_blocked_entry(entry: str) -> Optional[Tuple[str, Tuple[int, int]]]:
         rng = parse_range(range_part)
         if rng:
             return (route_part.strip().upper(), rng)
-    except:
+    except Exception:
         return None
     return None
 
@@ -182,7 +182,7 @@ def export_pdf(payload: PdfPayload):
         if current_route in blocked_map:
             for br in blocked_map[current_route]:
                 if overlaps(tr, br):
-                    error_msg = f"第 {i} 行：线路 {current_route} 的范围 {row.to_range} 属于不可转范围。"
+                    error_msg = t["err_overlap_blocked"].format(idx=i)
                     return JSONResponse({"ok": False, "msg": error_msg, "row": i}, status_code=400)
 
     # ✅ 生成 PDF
